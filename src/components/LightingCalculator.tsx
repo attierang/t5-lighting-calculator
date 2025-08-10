@@ -233,14 +233,17 @@ export function LightingCalculator() {
 
       const result = await response.json();
 
-      if (result.success && result.data) {
-        setRecentCalculations(result.data);
+      if (result.success) {
+        setRecentCalculations(result.data || []);
+      } else {
+        setRecentCalculations([]);
       }
     } catch (error) {
       console.error(
         "Error loading recent calculations:",
         error,
       );
+      setRecentCalculations([]);
     }
   };
 
