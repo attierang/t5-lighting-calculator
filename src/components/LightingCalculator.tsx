@@ -88,12 +88,12 @@ const LIGHTING_TYPES: LightingType[] = [
 
 export function LightingCalculator() {
   const [totalLength, setTotalLength] =
-    useState<string>("2587");
-  const [width, setWidth] = useState<string>("1200");
-  const [height, setHeight] = useState<string>("1387");
+    useState<string>("");
+  const [width, setWidth] = useState<string>("");
+  const [height, setHeight] = useState<string>("");
   const [inputMode, setInputMode] = useState<
     "total" | "separate"
-  >("separate");
+  >("total");
   const [includePowerCord, setIncludePowerCord] =
     useState<boolean>(true);
   const [optimalCombinations, setOptimalCombinations] =
