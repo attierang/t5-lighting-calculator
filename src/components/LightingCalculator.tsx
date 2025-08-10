@@ -119,8 +119,13 @@ export function LightingCalculator() {
     if (inputMode === "separate" && width && height) {
       const widthNum = parseInt(width) || 0;
       const heightNum = parseInt(height) || 0;
-      const perimeter = (widthNum + heightNum) * 2;
-      setTotalLength(perimeter.toString());
+      // 0이 아닐 때만 계산
+      if (widthNum > 0 && heightNum > 0) {
+        const perimeter = (widthNum + heightNum) * 2;
+        setTotalLength(perimeter.toString());
+      } else {
+        setTotalLength("");
+      }
     }
   }, [width, height, inputMode]);
 
@@ -134,10 +139,10 @@ export function LightingCalculator() {
     setOptimalCombinations([]);
 
     if (mode === "separate") {
-      // 가로/세로 모드로 변경 시 기본값 설정
+      // 가로/세로 모드로 변경 시 기본값 설정 (0으로 유지)
       if (!width || !height) {
-        setWidth("1200");
-        setHeight("1387");
+        setWidth("0");
+        setHeight("0");
       }
     }
   };
@@ -415,7 +420,10 @@ export function LightingCalculator() {
 
   const calculateOptimalCombinations = () => {
     const target = parseInt(totalLength);
-    if (target <= 0) return;
+    if (target <= 0) {
+      toast.error("유효한 길이를 입력해주세요.");
+      return;
+    }
 
     const allCombinations: OptimalCombination[] = [];
 
