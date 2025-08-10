@@ -797,7 +797,7 @@ export function LightingCalculator() {
         </div>
       )}
 
-      <div className="mt-[200px]">
+      <div style={{ marginTop: '200px' }}>
         <h2 className="text-lg sm:text-xl mb-[10px]">최근 계산 결과</h2>
         {recentCalculations.length > 0 ? (
           <Accordion
