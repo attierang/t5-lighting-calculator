@@ -797,7 +797,7 @@ export function LightingCalculator() {
         </div>
       )}
 
-      <div className="mt-[40px]">
+      <div className="mt-[60px]">
         <h2 className="text-lg sm:text-xl mb-[10px]">최근 계산 결과</h2>
         {recentCalculations.length > 0 ? (
           <Accordion
@@ -921,9 +921,7 @@ export function LightingCalculator() {
           </Accordion>
         ) : (
           <div className="text-center py-8 text-gray-500">
-            <div className="text-lg mb-2">📋</div>
             <div className="text-base">최근 계산한 결과가 없습니다</div>
-            <div className="text-sm mt-1">계산을 완료하면 여기에 저장됩니다</div>
           </div>
         )}
       </div>
