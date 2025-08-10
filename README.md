@@ -39,7 +39,7 @@
 
 이 앱은 GitHub Pages를 통해 배포됩니다:
 
-- **URL**: https://your-username.github.io/t5-lighting-calculator
+- **URL**: https://attierang.github.io/t5-lighting-calculator
 - **자동 배포**: main 브랜치에 푸시하면 자동으로 배포됩니다
 
 ## 🔧 개발 환경 설정
