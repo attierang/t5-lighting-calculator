@@ -539,19 +539,17 @@ export function LightingCalculator() {
     combination: OptimalCombination,
     index: number,
   ) => {
-    const fullCombination = combination.combinations.flatMap((item) => {
+    // 조합 데이터를 그대로 사용 (flatMap 제거)
+    const combinationData = combination.combinations.map((item) => {
       const lightingType = LIGHTING_TYPES.find((type) => type.name === item.type);
-      return Array(item.quantity).fill({
+      return {
         ...item,
         nominalLength: lightingType?.nominalLength || 0,
         actualLength: lightingType?.actualLength || 0,
-      });
+      };
     });
 
-    const calculatedTotalUsedLength = fullCombination.reduce(
-      (sum, item) => sum + item.usedLength,
-      0,
-    );
+    const calculatedTotalUsedLength = combination.totalUsedLength;
     const calculatedRemainingLength = combination.remainingLength;
 
     return (
@@ -578,7 +576,7 @@ export function LightingCalculator() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {fullCombination.map((item, idx) => (
+                {combinationData.map((item, idx) => (
                   <TableRow key={idx} className="h-8">
                     <TableCell className="text-center text-xs py-1 text-[14px]">
                       {item.type === "T5코드"
