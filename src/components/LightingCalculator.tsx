@@ -435,6 +435,13 @@ export function LightingCalculator() {
     const t5UsedLength = t5Quantity * 60;
     const remainingAfterT5 = target - t5UsedLength;
 
+    // 디버깅용 로그
+    console.log('전원코드 포함:', includePowerCord);
+    console.log('T5코드 수량:', t5Quantity);
+    console.log('T5코드 사용 길이:', t5UsedLength);
+    console.log('총 길이:', target);
+    console.log('T5코드 제외 후 남은 길이:', remainingAfterT5);
+
     if (remainingAfterT5 < 0) {
       toast.error("전원코드 길이(60mm)가 총 길이보다 큽니다.");
       return;
@@ -710,9 +717,13 @@ export function LightingCalculator() {
             <Checkbox
               id="powerCord"
               checked={includePowerCord}
-              onCheckedChange={(checked) =>
-                setIncludePowerCord(checked as boolean)
-              }
+              onCheckedChange={(checked) => {
+                setIncludePowerCord(checked as boolean);
+                // 전원코드 설정이 변경되면 계산 결과 초기화
+                setIsCalculated(false);
+                setOptimalCombinations([]);
+                setShareUrl("");
+              }}
               className="h-5 w-5 sm:h-4 sm:w-4"
             />
             <label htmlFor="powerCord" className="text-sm">
