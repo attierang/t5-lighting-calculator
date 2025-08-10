@@ -89,8 +89,8 @@ const LIGHTING_TYPES: LightingType[] = [
 export function LightingCalculator() {
   const [totalLength, setTotalLength] =
     useState<string>("");
-  const [width, setWidth] = useState<string>("");
-  const [height, setHeight] = useState<string>("");
+  const [width, setWidth] = useState<string>("0");
+  const [height, setHeight] = useState<string>("0");
   const [inputMode, setInputMode] = useState<
     "total" | "separate"
   >("total");
@@ -797,7 +797,7 @@ export function LightingCalculator() {
         </div>
       )}
 
-      <div className="mt-[100px]">
+      <div className="mt-[120px]">
         <h2 className="text-lg sm:text-xl mb-[10px]">최근 계산 결과</h2>
         {recentCalculations.length > 0 ? (
           <Accordion
