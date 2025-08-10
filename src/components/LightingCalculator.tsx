@@ -93,7 +93,7 @@ export function LightingCalculator() {
   const [height, setHeight] = useState<string>("0");
   const [inputMode, setInputMode] = useState<
     "total" | "separate"
-  >("total");
+  >("separate");
   const [includePowerCord, setIncludePowerCord] =
     useState<boolean>(true);
   const [optimalCombinations, setOptimalCombinations] =
