@@ -718,14 +718,123 @@ export function LightingCalculator() {
               id="powerCord"
               checked={includePowerCord}
               onCheckedChange={(checked) => {
-                setIncludePowerCord(checked as boolean);
+                const newIncludePowerCord = checked as boolean;
+                setIncludePowerCord(newIncludePowerCord);
                 // 전원코드 설정이 변경되면 공유 URL만 초기화
                 setShareUrl("");
                 // 이미 계산된 결과가 있다면 새로운 설정으로 재계산
                 if (isCalculated && optimalCombinations.length > 0) {
-                  // 약간의 지연을 두어 상태 업데이트 후 계산 실행
+                  // 상태 업데이트 후 즉시 재계산
                   setTimeout(() => {
-                    calculateOptimalCombinations();
+                    // 새로운 상태값을 직접 사용하여 계산
+                    const target = parseInt(totalLength);
+                    if (target <= 0) return;
+
+                    const allCombinations: OptimalCombination[] = [];
+
+                    // 새로운 전원코드 설정으로 계산
+                    const t5Quantity = newIncludePowerCord ? 1 : 0;
+                    const t5UsedLength = t5Quantity * 60;
+                    const remainingAfterT5 = target - t5UsedLength;
+
+                    console.log('재계산 - 전원코드 포함:', newIncludePowerCord);
+                    console.log('재계산 - T5코드 수량:', t5Quantity);
+                    console.log('재계산 - T5코드 사용 길이:', t5UsedLength);
+
+                    if (remainingAfterT5 < 0) {
+                      toast.error("전원코드 길이(60mm)가 총 길이보다 큽니다.");
+                      return;
+                    }
+
+                    // T5코드를 제외한 나머지 조명으로 조합 계산
+                    const lightingTypesExceptT5 = LIGHTING_TYPES.slice(0, -1);
+
+                    // 조합 생성 함수 (기존과 동일)
+                    const generateCombinations = (
+                      remaining: number,
+                      currentCombination: CombinationResult[],
+                      typeIndex: number = 0,
+                    ) => {
+                      if (remaining <= 0 || typeIndex >= lightingTypesExceptT5.length) {
+                        const totalUsed =
+                          currentCombination.reduce(
+                            (sum, item) => sum + item.usedLength,
+                            0,
+                          ) + t5UsedLength;
+                        const remainingLength = target - totalUsed;
+
+                        if (remainingLength >= 0) {
+                          const finalCombination = [...currentCombination];
+                          if (t5Quantity > 0) {
+                            finalCombination.push({
+                              type: "T5코드",
+                              quantity: t5Quantity,
+                              usedLength: t5UsedLength,
+                            });
+                          }
+
+                          allCombinations.push({
+                            combinations: finalCombination.filter(
+                              (item) => item.quantity > 0,
+                            ),
+                            totalUsedLength: totalUsed,
+                            remainingLength: remainingLength,
+                          });
+                        }
+                        return;
+                      }
+
+                      const lightType = lightingTypesExceptT5[typeIndex];
+                      const maxQuantity = Math.floor(
+                        remaining / lightType.actualLength,
+                      );
+
+                      generateCombinations(
+                        remaining,
+                        currentCombination,
+                        typeIndex + 1,
+                      );
+
+                      for (let quantity = 1; quantity <= maxQuantity; quantity++) {
+                        const usedLength = quantity * lightType.actualLength;
+                        const newCombination = [
+                          ...currentCombination,
+                          {
+                            type: lightType.name,
+                            quantity,
+                            usedLength,
+                          },
+                        ];
+
+                        generateCombinations(
+                          remaining - usedLength,
+                          newCombination,
+                          typeIndex + 1,
+                        );
+                      }
+                    };
+
+                    generateCombinations(remainingAfterT5, []);
+
+                    if (allCombinations.length === 0) {
+                      const basicCombination: OptimalCombination = {
+                        combinations: t5Quantity > 0 ? [{
+                          type: "T5코드",
+                          quantity: t5Quantity,
+                          usedLength: t5UsedLength,
+                        }] : [],
+                        totalUsedLength: t5UsedLength,
+                        remainingLength: target - t5UsedLength,
+                      };
+                      allCombinations.push(basicCombination);
+                    }
+
+                    allCombinations.sort(
+                      (a, b) => a.remainingLength - b.remainingLength,
+                    );
+                    const topCombinations = allCombinations.slice(0, 3);
+
+                    setOptimalCombinations(topCombinations);
                   }, 0);
                 }
               }}
