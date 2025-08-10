@@ -432,19 +432,22 @@ export function LightingCalculator() {
     const t5UsedLength = t5Quantity * 60;
     const remainingAfterT5 = target - t5UsedLength;
 
-    if (remainingAfterT5 < 0) return;
+    if (remainingAfterT5 < 0) {
+      toast.error("전원코드 길이(60mm)가 총 길이보다 큽니다.");
+      return;
+    }
 
-    // T5코드를 제외한 나머지 조명으로 조합 계산 (T5코드 제외)
+    // T5코드를 제외한 나머지 조명으로 조합 계산
     const lightingTypesExceptT5 = LIGHTING_TYPES.slice(0, -1);
 
-    // 동적 프로그래밍을 사용하여 모든 가능한 조합 계산
+    // 더 효율적인 조합 생성 함수
     const generateCombinations = (
       remaining: number,
       currentCombination: CombinationResult[],
       typeIndex: number = 0,
     ) => {
-      if (typeIndex >= lightingTypesExceptT5.length) {
-        // 모든 조명 타입을 처리했을 때
+      // 남은 길이가 0이거나 모든 타입을 처리했을 때
+      if (remaining <= 0 || typeIndex >= lightingTypesExceptT5.length) {
         const totalUsed =
           currentCombination.reduce(
             (sum, item) => sum + item.usedLength,
@@ -452,22 +455,25 @@ export function LightingCalculator() {
           ) + t5UsedLength;
         const remainingLength = target - totalUsed;
 
-        const finalCombination = [...currentCombination];
-        if (t5Quantity > 0) {
-          finalCombination.push({
-            type: "T5코드",
-            quantity: t5Quantity,
-            usedLength: t5UsedLength,
+        // 남는 길이가 음수가 아닌 경우만 추가
+        if (remainingLength >= 0) {
+          const finalCombination = [...currentCombination];
+          if (t5Quantity > 0) {
+            finalCombination.push({
+              type: "T5코드",
+              quantity: t5Quantity,
+              usedLength: t5UsedLength,
+            });
+          }
+
+          allCombinations.push({
+            combinations: finalCombination.filter(
+              (item) => item.quantity > 0,
+            ),
+            totalUsedLength: totalUsed,
+            remainingLength: remainingLength,
           });
         }
-
-        allCombinations.push({
-          combinations: finalCombination.filter(
-            (item) => item.quantity > 0,
-          ),
-          totalUsedLength: totalUsed,
-          remainingLength: remainingLength,
-        });
         return;
       }
 
@@ -476,21 +482,24 @@ export function LightingCalculator() {
         remaining / lightType.actualLength,
       );
 
-      for (
-        let quantity = 0;
-        quantity <= maxQuantity;
-        quantity++
-      ) {
-        const usedLength = quantity * lightType.actualLength;
-        const newCombination = [...currentCombination];
+      // 현재 타입을 사용하지 않는 경우
+      generateCombinations(
+        remaining,
+        currentCombination,
+        typeIndex + 1,
+      );
 
-        if (quantity > 0) {
-          newCombination.push({
+      // 현재 타입을 1개부터 최대 개수까지 사용하는 경우
+      for (let quantity = 1; quantity <= maxQuantity; quantity++) {
+        const usedLength = quantity * lightType.actualLength;
+        const newCombination = [
+          ...currentCombination,
+          {
             type: lightType.name,
             quantity,
             usedLength,
-          });
-        }
+          },
+        ];
 
         generateCombinations(
           remaining - usedLength,
@@ -501,6 +510,20 @@ export function LightingCalculator() {
     };
 
     generateCombinations(remainingAfterT5, []);
+
+    // 조합이 없으면 기본 조합 생성
+    if (allCombinations.length === 0) {
+      const basicCombination: OptimalCombination = {
+        combinations: t5Quantity > 0 ? [{
+          type: "T5코드",
+          quantity: t5Quantity,
+          usedLength: t5UsedLength,
+        }] : [],
+        totalUsedLength: t5UsedLength,
+        remainingLength: target - t5UsedLength,
+      };
+      allCombinations.push(basicCombination);
+    }
 
     // 남는 길이가 적은 순으로 정렬하고 상위 3개 선택
     allCombinations.sort(
