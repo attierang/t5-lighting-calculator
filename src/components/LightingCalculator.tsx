@@ -719,10 +719,15 @@ export function LightingCalculator() {
               checked={includePowerCord}
               onCheckedChange={(checked) => {
                 setIncludePowerCord(checked as boolean);
-                // 전원코드 설정이 변경되면 계산 결과 초기화
-                setIsCalculated(false);
-                setOptimalCombinations([]);
+                // 전원코드 설정이 변경되면 공유 URL만 초기화
                 setShareUrl("");
+                // 이미 계산된 결과가 있다면 새로운 설정으로 재계산
+                if (isCalculated && optimalCombinations.length > 0) {
+                  // 약간의 지연을 두어 상태 업데이트 후 계산 실행
+                  setTimeout(() => {
+                    calculateOptimalCombinations();
+                  }, 0);
+                }
               }}
               className="h-5 w-5 sm:h-4 sm:w-4"
             />
