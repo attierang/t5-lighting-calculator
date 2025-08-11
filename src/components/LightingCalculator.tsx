@@ -614,7 +614,7 @@ export function LightingCalculator() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-100 h-8">
+                <TableRow className="bg-gray-100 h-6">
                   <TableHead className="text-center text-xs py-1 text-[13px] min-w-[80px]">
                     종류
                   </TableHead>
@@ -634,7 +634,7 @@ export function LightingCalculator() {
               </TableHeader>
               <TableBody>
                 {combinationData.map((item, idx) => (
-                  <TableRow key={idx} className="h-8">
+                  <TableRow key={idx} className="h-6">
                     <TableCell className="text-center text-xs py-1 text-[14px]">
                       {item.type === "T5코드"
                         ? `${item.type} (${item.actualLength})`
@@ -654,9 +654,9 @@ export function LightingCalculator() {
                     </TableCell>
                   </TableRow>
                 ))}
-                <TableRow className="bg-gray-50 h-8">
+                <TableRow className="bg-gray-50 h-6">
                   <TableCell className="text-center text-xs py-1 text-[14px] font-bold">
-                    총 사용 길이
+                    총합
                   </TableCell>
                   <TableCell></TableCell>
                   <TableCell className="text-center text-xs py-1 text-[14px] font-bold">
