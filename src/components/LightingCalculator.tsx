@@ -454,6 +454,7 @@ export function LightingCalculator() {
     console.log('T5코드 사용 길이:', t5UsedLength);
     console.log('총 길이:', target);
     console.log('T5코드 제외 후 남은 길이:', remainingAfterT5);
+    console.log('단가 설정:', unitPrices);
 
     if (remainingAfterT5 < 0) {
       toast.error("전원코드 길이(60mm)가 총 길이보다 큽니다.");
@@ -489,12 +490,30 @@ export function LightingCalculator() {
             });
           }
 
+          // 단가 계산 추가
+          const combinationsWithPrice = finalCombination.filter(
+            (item) => item.quantity > 0,
+          ).map(item => {
+            const unitPrice = parseFloat(unitPrices[item.type] || "0");
+            const totalPrice = unitPrice * item.quantity;
+            console.log(`단가 계산 - ${item.type}: 단가=${unitPrice}, 수량=${item.quantity}, 합계=${totalPrice}`);
+            return {
+              ...item,
+              unitPrice: unitPrice,
+              totalPrice: totalPrice
+            };
+          });
+
+          const totalPrice = combinationsWithPrice.reduce(
+            (sum, item) => sum + (item.totalPrice || 0), 0
+          );
+          console.log('조합 총 가격:', totalPrice);
+
           allCombinations.push({
-            combinations: finalCombination.filter(
-              (item) => item.quantity > 0,
-            ),
+            combinations: combinationsWithPrice,
             totalUsedLength: totalUsed,
             remainingLength: remainingLength,
+            totalPrice: totalPrice
           });
         }
         return;
