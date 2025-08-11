@@ -611,23 +611,23 @@ export function LightingCalculator() {
               # 조합{index + 1}
             </span>
           </div>
-          <div className="overflow-x-auto">
-            <Table>
+          <div>
+            <Table className="w-full">
               <TableHeader>
                 <TableRow className="bg-gray-100 h-6">
-                  <TableHead className="text-center text-xs py-1 text-[13px] min-w-[80px]">
+                  <TableHead className="text-center text-xs py-1 text-[13px] w-[25%]">
                     종류
                   </TableHead>
-                  <TableHead className="text-center text-xs py-1 text-[14px] min-w-[60px]">
+                  <TableHead className="text-center text-xs py-1 text-[14px] w-[15%]">
                     수량
                   </TableHead>
-                  <TableHead className="text-center text-xs py-1 text-[14px] min-w-[80px]">
+                  <TableHead className="text-center text-xs py-1 text-[14px] w-[20%]">
                     사용 길이
                   </TableHead>
-                  <TableHead className="text-center text-xs py-1 text-[14px] min-w-[70px]">
+                  <TableHead className="text-center text-xs py-1 text-[14px] w-[20%]">
                     단가
                   </TableHead>
-                  <TableHead className="text-center text-xs py-1 text-[14px] min-w-[80px]">
+                  <TableHead className="text-center text-xs py-1 text-[14px] w-[20%]">
                     합계
                   </TableHead>
                 </TableRow>
