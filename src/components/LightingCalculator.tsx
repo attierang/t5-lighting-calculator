@@ -57,12 +57,15 @@ interface CombinationResult {
   type: string;
   quantity: number;
   usedLength: number;
+  unitPrice?: number;
+  totalPrice?: number;
 }
 
 interface OptimalCombination {
   combinations: CombinationResult[];
   totalUsedLength: number;
   remainingLength: number;
+  totalPrice?: number;
 }
 
 interface CalculationData {
@@ -113,6 +116,16 @@ export function LightingCalculator() {
     null,
   );
   const [editingName, setEditingName] = useState<string>("");
+  
+  // 단가 관련 상태
+  const [unitPrices, setUnitPrices] = useState<{[key: string]: string}>({
+    "1200": "",
+    "900": "",
+    "600": "",
+    "400": "",
+    "300": "",
+    "T5코드": ""
+  });
 
   // 가로/세로 길이가 변경될 때 총 길이 자동 계산
   useEffect(() => {
@@ -523,14 +536,23 @@ export function LightingCalculator() {
 
     // 조합이 없으면 기본 조합 생성
     if (allCombinations.length === 0) {
+      const basicCombinations = t5Quantity > 0 ? [{
+        type: "T5코드",
+        quantity: t5Quantity,
+        usedLength: t5UsedLength,
+        unitPrice: parseFloat(unitPrices["T5코드"] || "0"),
+        totalPrice: parseFloat(unitPrices["T5코드"] || "0") * t5Quantity
+      }] : [];
+      
+      const totalPrice = basicCombinations.reduce(
+        (sum, item) => sum + (item.totalPrice || 0), 0
+      );
+
       const basicCombination: OptimalCombination = {
-        combinations: t5Quantity > 0 ? [{
-          type: "T5코드",
-          quantity: t5Quantity,
-          usedLength: t5UsedLength,
-        }] : [],
+        combinations: basicCombinations,
         totalUsedLength: t5UsedLength,
         remainingLength: target - t5UsedLength,
+        totalPrice: totalPrice
       };
       allCombinations.push(basicCombination);
     }
@@ -583,6 +605,12 @@ export function LightingCalculator() {
                   <TableHead className="text-center text-xs py-1 text-[14px] min-w-[80px]">
                     사용 길이
                   </TableHead>
+                  <TableHead className="text-center text-xs py-1 text-[14px] min-w-[70px]">
+                    단가
+                  </TableHead>
+                  <TableHead className="text-center text-xs py-1 text-[14px] min-w-[80px]">
+                    합계
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -599,6 +627,12 @@ export function LightingCalculator() {
                     <TableCell className="text-center text-xs py-1 text-[14px]">
                       {item.usedLength}
                     </TableCell>
+                    <TableCell className="text-center text-xs py-1 text-[14px]">
+                      {item.unitPrice ? `${item.unitPrice.toLocaleString()}원` : '-'}
+                    </TableCell>
+                    <TableCell className="text-center text-xs py-1 text-[14px]">
+                      {item.totalPrice ? `${item.totalPrice.toLocaleString()}원` : '-'}
+                    </TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="bg-gray-50 h-8">
@@ -608,6 +642,10 @@ export function LightingCalculator() {
                   <TableCell></TableCell>
                   <TableCell className="text-center text-xs py-1 text-[14px] font-bold">
                     {calculatedTotalUsedLength}
+                  </TableCell>
+                  <TableCell></TableCell>
+                  <TableCell className="text-center text-xs py-1 text-[14px] font-bold">
+                    {combination.totalPrice ? `${combination.totalPrice.toLocaleString()}원` : '-'}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -773,12 +811,27 @@ export function LightingCalculator() {
                             });
                           }
 
+                          // 단가 계산 추가
+                          const combinationsWithPrice = finalCombination.filter(
+                            (item) => item.quantity > 0,
+                          ).map(item => {
+                            const unitPrice = parseFloat(unitPrices[item.type] || "0");
+                            return {
+                              ...item,
+                              unitPrice: unitPrice,
+                              totalPrice: unitPrice * item.quantity
+                            };
+                          });
+
+                          const totalPrice = combinationsWithPrice.reduce(
+                            (sum, item) => sum + (item.totalPrice || 0), 0
+                          );
+
                           allCombinations.push({
-                            combinations: finalCombination.filter(
-                              (item) => item.quantity > 0,
-                            ),
+                            combinations: combinationsWithPrice,
                             totalUsedLength: totalUsed,
                             remainingLength: remainingLength,
+                            totalPrice: totalPrice
                           });
                         }
                         return;
@@ -843,6 +896,73 @@ export function LightingCalculator() {
             <label htmlFor="powerCord" className="text-sm">
               전원코드 포함(60mm)
             </label>
+          </div>
+
+          {/* 단가 입력 섹션 */}
+          <div className="mt-[15px]">
+            <h3 className="text-sm font-medium mb-[10px]">조명 단가 설정 (원)</h3>
+            <div className="grid grid-cols-2 gap-[10px]">
+              <div>
+                <label className="text-xs text-gray-600 block mb-1">1200mm</label>
+                <Input
+                  type="number"
+                  value={unitPrices["1200"]}
+                  onChange={(e) => setUnitPrices(prev => ({...prev, "1200": e.target.value}))}
+                  placeholder="단가 입력"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 block mb-1">900mm</label>
+                <Input
+                  type="number"
+                  value={unitPrices["900"]}
+                  onChange={(e) => setUnitPrices(prev => ({...prev, "900": e.target.value}))}
+                  placeholder="단가 입력"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 block mb-1">600mm</label>
+                <Input
+                  type="number"
+                  value={unitPrices["600"]}
+                  onChange={(e) => setUnitPrices(prev => ({...prev, "600": e.target.value}))}
+                  placeholder="단가 입력"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 block mb-1">400mm</label>
+                <Input
+                  type="number"
+                  value={unitPrices["400"]}
+                  onChange={(e) => setUnitPrices(prev => ({...prev, "400": e.target.value}))}
+                  placeholder="단가 입력"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 block mb-1">300mm</label>
+                <Input
+                  type="number"
+                  value={unitPrices["300"]}
+                  onChange={(e) => setUnitPrices(prev => ({...prev, "300": e.target.value}))}
+                  placeholder="단가 입력"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 block mb-1">T5코드</label>
+                <Input
+                  type="number"
+                  value={unitPrices["T5코드"]}
+                  onChange={(e) => setUnitPrices(prev => ({...prev, "T5코드": e.target.value}))}
+                  placeholder="단가 입력"
+                  className="h-8 text-sm"
+                />
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
